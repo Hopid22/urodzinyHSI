@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSI EVENTS - Odliczanie do Wydarzeń</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Montserrat & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        iiyama: {
+                            red: '#FF6600',
+                            hoverRed: '#E05500',
+                            dark: '#0D0D0D',
+                            card: '#161616',
+                            cardBorder: '#282828',
+                            grayText: '#9E9E9E',
+                            lightBg: '#222222'
+                        }
+                    },
+                    fontFamily: {
+                        montserrat: ['Montserrat', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0D0D0D;
+            color: #FFFFFF;
+        }
+        .heading-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+        /* Subtelny glow wokół akcentów */
+        .iiyama-glow {
+            box-shadow: 0 0 25px rgba(255, 102, 0, 0.25);
+        }
+        .card-glow:hover {
+            box-shadow: 0 4px 20px rgba(255, 102, 0, 0.15);
+            border-color: #FF6600;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-iiyama-red selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-[#121212] border-b border-iiyama-cardBorder sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <span class="text-4xl sm:text-5xl font-black heading-font tracking-tighter text-white">
+                    HSI <span class="text-4xl sm:text-5xl font-black heading-font text-iiyama-red uppercase">EVENTS</span>
+                </span>
+            </div>
+            <div id="currentDateTime" class="flex flex-col items-end text-right">
+                <div class="text-2xl sm:text-3xl font-bold text-white tracking-wide flex items-center gap-2">
+                    <i class="fa-regular fa-calendar-days text-white/80"></i> <span id="dateText">--</span>
+                </div>
+                <div class="text-xl sm:text-2xl font-extrabold text-iiyama-red tracking-wider flex items-center gap-2 mt-0.5">
+                    <i class="fa-regular fa-clock"></i> <span id="timeText">--</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl w-full mx-auto px-4 py-8 space-y-10 flex-grow">
+
+        <!-- 1. HERO SECTION: Najbliższe Wydarzenie -->
+        <section id="heroSection" class="relative bg-gradient-to-br from-[#181818] to-[#111111] border border-iiyama-cardBorder rounded-2xl p-6 sm:p-10 iiyama-glow overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-iiyama-red/10 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+
+            <!-- Nagłówek statusu -->
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <span class="inline-flex items-center gap-2 bg-iiyama-red text-white text-xs font-extrabold uppercase px-3 py-1.5 rounded-md tracking-wider">
+                    <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                    Najbliższe wydarzenie
+                </span>
+                <span id="heroDateFormatted" class="text-sm font-semibold text-iiyama-grayText">
+                    <i class="fa-regular fa-calendar-check mr-1.5"></i> --.--.----
+                </span>
+            </div>
+
+            <!-- Tytuł najbliższego wydarzenia -->
+            <div class="mb-8">
+                <h1 id="heroTitle" class="text-3xl sm:text-5xl font-black heading-font tracking-tight text-white mb-2">
+                    Ładowanie wydarzenia...
+                </h1>
+                <p id="heroSubtitle" class="text-iiyama-grayText text-sm sm:text-base">
+                    Przygotuj się! Pozostały czas do rozpoczęcia:
+                </p>
+            </div>
+
+            <!-- Zegar Odliczający (Dni, Godziny, Minuty, Sekundy) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 text-center">
+                <!-- DNI -->
+                <div class="bg-[#0A0A0A]/80 border border-iiyama-cardBorder/80 rounded-xl p-4 sm:p-6 backdrop-blur-sm">
+                    <span id="heroDays" class="block text-4xl sm:text-6xl font-black heading-font text-iiyama-red">00</span>
+                    <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-iiyama-grayText mt-1 block">Dni</span>
+                </div>
+                <!-- GODZINY -->
+                <div class="bg-[#0A0A0A]/80 border border-iiyama-cardBorder/80 rounded-xl p-4 sm:p-6 backdrop-blur-sm">
+                    <span id="heroHours" class="block text-4xl sm:text-6xl font-black heading-font text-white">00</span>
+                    <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-iiyama-grayText mt-1 block">Godzin</span>
+                </div>
+                <!-- MINUTY -->
+                <div class="bg-[#0A0A0A]/80 border border-iiyama-cardBorder/80 rounded-xl p-4 sm:p-6 backdrop-blur-sm">
+                    <span id="heroMinutes" class="block text-3xl sm:text-5xl font-bold heading-font text-white/90">00</span>
+                    <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-iiyama-grayText mt-1 block">Minut</span>
+                </div>
+                <!-- SEKUNDY (Kolor Biały) -->
+                <div class="bg-[#0A0A0A]/80 border border-iiyama-cardBorder/80 rounded-xl p-4 sm:p-6 backdrop-blur-sm">
+                    <span id="heroSeconds" class="block text-3xl sm:text-5xl font-bold heading-font text-white">00</span>
+                    <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-iiyama-grayText mt-1 block">Sekund</span>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 2. FORMULARZ DODAWANIA WYDARZENIA -->
+        <section class="bg-iiyama-card border border-iiyama-cardBorder rounded-xl p-6 shadow-xl">
+            <h2 class="text-xl font-bold heading-font mb-4 flex items-center gap-2 text-white">
+                <i class="fa-solid fa-plus-circle text-iiyama-red"></i> Dodaj nowe wydarzenie
+            </h2>
+
+            <form id="addEventForm" class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <!-- Nazwa wydarzenia -->
+                <div class="md:col-span-5">
+                    <label for="eventName" class="block text-xs font-semibold text-iiyama-grayText uppercase tracking-wider mb-2">Nazwa wydarzenia</label>
+                    <input type="text" id="eventName" required placeholder="np. Premiera nowego monitora G-Master" 
+                           class="w-full bg-[#0D0D0D] border border-iiyama-cardBorder rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-iiyama-red transition duration-200">
+                </div>
+
+                <!-- Data wydarzenia -->
+                <div class="md:col-span-4">
+                    <label for="eventDate" class="block text-xs font-semibold text-iiyama-grayText uppercase tracking-wider mb-2">Data i godzina</label>
+                    <input type="datetime-local" id="eventDate" required 
+                           class="w-full bg-[#0D0D0D] border border-iiyama-cardBorder rounded-lg px-4 py-3 text-white focus:outline-none focus:border-iiyama-red transition duration-200 [color-scheme:dark]">
+                </div>
+
+                <!-- Przycisk dodawania -->
+                <div class="md:col-span-3 flex items-end">
+                    <button type="submit" 
+                            class="w-full bg-iiyama-red hover:bg-iiyama-hoverRed text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2 heading-font shadow-lg hover:shadow-iiyama-red/30">
+                        <i class="fa-solid fa-calendar-plus"></i> Dodaj wydarzenie
+                    </button>
+                </div>
+            </form>
+        </section>
+
+
+        <!-- 3. LISTA NADCHODZĄCYCH WYDARZEŃ -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold heading-font flex items-center gap-2 text-white">
+                    <i class="fa-solid fa-list-ul text-iiyama-red"></i> Nadchodzące wydarzenia
+                </h2>
+                <span id="eventsCount" class="text-xs bg-iiyama-cardBorder text-iiyama-grayText px-3 py-1 rounded-full font-semibold">
+                    0 wydarzeń
+                </span>
+            </div>
+
+            <!-- Kontener listy -->
+            <div id="eventsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Kafelki renderowane dynamicznie w JS -->
+            </div>
+
+            <!-- Stan braku wydarzeń -->
+            <div id="emptyState" class="hidden text-center py-12 bg-iiyama-card/50 border border-dashed border-iiyama-cardBorder rounded-xl">
+                <i class="fa-regular fa-calendar-xmark text-4xl text-iiyama-grayText mb-3 block"></i>
+                <p class="text-iiyama-grayText font-medium">Brak nadchodzących wydarzeń na liście.</p>
+                <p class="text-xs text-gray-500 mt-1">Użyj formularza powyżej, aby dodać pierwsze wydarzenie!</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#121212] border-t border-iiyama-cardBorder py-6 mt-12">
+        <div class="max-w-6xl mx-auto px-4 text-center text-xs text-iiyama-grayText space-y-2">
+            <p>&copy; <span id="year"></span> HSI EVENTS. Wszystkie prawa zastrzeżone.</p>
+        </div>
+    </footer>
+
+    <!-- JS Logic -->
+    <script>
+        // Domyślne dane początkowe
+        const DEFAULT_EVENTS = [
+            { id: '1', name: 'Cyber Monday', date: '2026-11-23T00:00' },
+            { id: '2', name: 'Black Friday', date: '2026-11-27T00:00' },
+            { id: '3', name: 'Święta Bożego Narodzenia', date: '2026-12-25T00:00' }
+        ];
+
+        let events = [];
+
+        // Pobranie elementów z DOM
+        const heroSection = document.getElementById('heroSection');
+        const heroTitle = document.getElementById('heroTitle');
+        const heroDateFormatted = document.getElementById('heroDateFormatted');
+        const heroDays = document.getElementById('heroDays');
+        const heroHours = document.getElementById('heroHours');
+        const heroMinutes = document.getElementById('heroMinutes');
+        const heroSeconds = document.getElementById('heroSeconds');
+        
+        const addEventForm = document.getElementById('addEventForm');
+        const eventNameInput = document.getElementById('eventName');
+        const eventDateInput = document.getElementById('eventDate');
+        
+        const eventsList = document.getElementById('eventsList');
+        const emptyState = document.getElementById('emptyState');
+        const eventsCount = document.getElementById('eventsCount');
+
+        // Inicjalizacja aplikacji
+        function initApp() {
+            document.getElementById('year').textContent = new Date().getFullYear();
+            loadEvents();
+            setInterval(updateCountdowns, 1000);
+            updateCountdowns();
+        }
+
+        // Ładowanie z localStorage lub ustawienie domyślnych
+        function loadEvents() {
+            const stored = localStorage.getItem('iiyama_events');
+            if (stored) {
+                try {
+                    events = JSON.parse(stored);
+                } catch (e) {
+                    events = [...DEFAULT_EVENTS];
+                }
+            } else {
+                events = [...DEFAULT_EVENTS];
+                saveEvents();
+            }
+        }
+
+        // Zapis do localStorage
+        function saveEvents() {
+            localStorage.setItem('iiyama_events', JSON.stringify(events));
+        }
+
+        // Dodawanie nowego wydarzenia
+        addEventForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = eventNameInput.value.trim();
+            const date = eventDateInput.value;
+
+            if (!name || !date) return;
+
+            const newEvent = {
+                id: Date.now().toString(),
+                name: name,
+                date: date
+            };
+
+            events.push(newEvent);
+            saveEvents();
+            updateCountdowns();
+
+            eventNameInput.value = '';
+            eventDateInput.value = '';
+        });
+
+        // Usuwanie wydarzenia
+        function deleteEvent(id) {
+            events = events.filter(ev => ev.id !== id);
+            saveEvents();
+            updateCountdowns();
+        }
+
+        // Formatowanie czytelnej daty wydarzenia (np. 27.11.2026)
+        function formatDateOnly(dateString) {
+            const d = new Date(dateString);
+            if (isNaN(d.getTime())) return dateString;
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}.${month}.${year}`;
+        }
+
+        // Aktualizacja aktualnego dnia tygodnia, daty i godziny w nagłówku
+        function updateLiveHeaderDateTime() {
+            const now = new Date();
+            const daysOfWeek = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
+            const dayName = daysOfWeek[now.getDay()];
+            
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            const dateString = `${dayName}, ${day}.${month}.${year}`;
+            const timeString = `${hours}:${minutes}:${seconds}`;
+            
+            const dateEl = document.getElementById('dateText');
+            const timeEl = document.getElementById('timeText');
+            
+            if (dateEl) dateEl.textContent = dateString;
+            if (timeEl) timeEl.textContent = timeString;
+        }
+
+        // Główna pętla przeliczania i renderowania
+        function updateCountdowns() {
+            updateLiveHeaderDateTime();
+            const now = new Date().getTime();
+
+            // Sortowanie wydarzeń chronologicznie według daty
+            events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+            // Filtrowanie wydarzeń przyszłych dla Sekcji Hero
+            const futureEvents = events.filter(ev => new Date(ev.date).getTime() > now);
+
+            // 1. Renderowanie Sekcji Hero (Najbliższe wydarzenie)
+            if (futureEvents.length > 0) {
+                const closest = futureEvents[0];
+                const targetTime = new Date(closest.date).getTime();
+                const diff = targetTime - now;
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                heroTitle.textContent = closest.name;
+                heroDateFormatted.innerHTML = `<i class="fa-regular fa-calendar-check mr-1.5"></i> ${formatDateOnly(closest.date)}`;
+                heroDays.textContent = String(days).padStart(2, '0');
+                heroHours.textContent = String(hours).padStart(2, '0');
+                heroMinutes.textContent = String(minutes).padStart(2, '0');
+                heroSeconds.textContent = String(seconds).padStart(2, '0');
+
+                heroSection.classList.remove('opacity-50');
+            } else if (events.length > 0) {
+                // Gdy są wydarzenia, ale wszystkie się już odbyły
+                const latest = events[events.length - 1];
+                heroTitle.textContent = latest.name;
+                heroDateFormatted.innerHTML = `<i class="fa-regular fa-calendar-check mr-1.5"></i> ${formatDateOnly(latest.date)}`;
+                heroDays.textContent = '00';
+                heroHours.textContent = '00';
+                heroMinutes.textContent = '00';
+                heroSeconds.textContent = '00';
+            } else {
+                // Brak jakichkolwiek wydarzeń
+                heroTitle.textContent = "Brak wydarzeń";
+                heroDateFormatted.innerHTML = `<i class="fa-regular fa-calendar-check mr-1.5"></i> --.--.----`;
+                heroDays.textContent = '00';
+                heroHours.textContent = '00';
+                heroMinutes.textContent = '00';
+                heroSeconds.textContent = '00';
+            }
+
+            // 2. Renderowanie Listy Wydarzeń
+            renderEventsList(now);
+        }
+
+        // Renderowanie kafelków listy
+        function renderEventsList(now) {
+            eventsCount.textContent = `${events.length} ${events.length === 1 ? 'wydarzenie' : (events.length > 1 && events.length < 5 ? 'wydarzenia' : 'wydarzeń')}`;
+
+            if (events.length === 0) {
+                eventsList.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            eventsList.innerHTML = events.map(ev => {
+                const targetTime = new Date(ev.date).getTime();
+                const diff = targetTime - now;
+                const isPast = diff <= 0;
+
+                let days = 0;
+
+                if (!isPast) {
+                    days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                }
+
+                return `
+                    <div class="bg-iiyama-card border border-iiyama-cardBorder rounded-xl p-5 flex flex-col justify-between transition-all duration-300 card-glow relative group">
+                        <div>
+                            <!-- Nagłówek karty i Usuwanie -->
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <h3 class="font-bold text-lg text-white heading-font line-clamp-2 leading-tight">
+                                    ${escapeHtml(ev.name)}
+                                </h3>
+                                <button onclick="deleteEvent('${ev.id}')" 
+                                        title="Usuń wydarzenie"
+                                        class="text-iiyama-grayText hover:text-iiyama-red p-1.5 rounded-lg transition duration-200 hover:bg-iiyama-red/10">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </div>
+
+                            <!-- Data wydarzenia (tylko d.m.y) -->
+                            <div class="text-xs text-iiyama-grayText flex items-center gap-1.5 mb-4">
+                                <i class="fa-regular fa-calendar text-iiyama-red"></i>
+                                ${formatDateOnly(ev.date)}
+                            </div>
+                        </div>
+
+                        <!-- Czas pozostały (W jednej linijce, ilość dni pogrubiona na czerwono) -->
+                        <div class="pt-4 border-t border-iiyama-cardBorder/60 flex items-center justify-between">
+                            ${isPast ? `
+                                <span class="inline-flex items-center text-xs font-semibold text-gray-400 bg-gray-800/80 px-2.5 py-1 rounded">
+                                    Wydarzenie zakończone
+                                </span>
+                            ` : `
+                                <div class="text-sm text-iiyama-grayText font-medium">
+                                    Pozostało: <span class="text-xl font-extrabold heading-font text-iiyama-red ml-1 mr-0.5">${days}</span> dni
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Zapobieganie XSS
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Start aplikacji
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
